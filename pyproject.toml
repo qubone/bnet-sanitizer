@@ -1,0 +1,125 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bnet-sanitizer"
+version = "0.1.0"
+description = "Pre-flight sanitizer and daemon for Battle.net on Linux/Wine"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "psutil>=5.9.0",
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+]
+
+[project.scripts]
+bnet-sanitizer = "bnet_sanitizer.cli:app"
+
+[project.optional-dependencies]
+lint = ["ruff"]
+typecheck = ["mypy"]
+test = ["pytest", "pytest-cov"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/bnet_sanitizer"]
+
+[dependency-groups]
+ci = [
+    "q-python-ci-generator",
+]
+dev = [
+    "mypy>=2.3.1",
+    "pytest>=9.1.1",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.16.8",
+    "types-psutil>=7.2.2.20260906",
+]
+
+[tool.ruff]
+line-length = 119
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "I", "N", "B", "A", "C", "D", "S", "LOG", "RUF", "SIM", "TRY", "UP", "TCH", "PL"]
+ignore = ["S603"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["S101"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pylint]
+max-args = 6
+max-branches = 12
+max-statements = 50
+
+[tool.mypy]
+# Global settings
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unreachable = true
+strict_equality = true
+strict_optional = true
+
+# Error reporting
+show_error_codes = true
+show_error_context = true
+pretty = true
+no_implicit_optional = true
+no_implicit_reexport = true
+
+# Checking untyped code
+check_untyped_defs = true
+disallow_any_expr = false
+disallow_any_unimported = true
+disallow_incomplete_defs = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+
+# Performance
+incremental = true
+sqlite_cache = true
+
+# Other
+plugins = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "--strict-markers -v --cov=src/bnet_sanitizer --cov-report=term-missing --cov-report=html --cov-fail-under=100"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["src/bnet_sanitizer"]
+omit = ["*/site-packages/*"]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.:",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]
+
+[tool.uv.sources]
+q-python-ci-generator = { git = "https://github.com/qubone/q-python-ci-generator.git", rev = "main" }
